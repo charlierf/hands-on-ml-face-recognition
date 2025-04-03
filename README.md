@@ -1,7 +1,3 @@
-Segue abaixo a versão em inglês do README, estruturada de forma bilíngue:
-
----
-
 ## Português
 
 # Classificador de Faces com Keras (API Sequencial) - Dataset Olivetti
