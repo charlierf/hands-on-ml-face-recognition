@@ -1,2 +1,2 @@
 # hands-on-ml-face-recognition
-Implementing a face classification algorithm using keras Sequential API
+Implementing a deep learning algorithm for face classification using keras Sequential API
