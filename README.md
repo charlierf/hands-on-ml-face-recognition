@@ -31,7 +31,7 @@ Para combater o desbalanceamento, apliquei pesos às classes (`class_weight='bal
 
 - A acurácia caiu para ~5.9%.
 - O modelo passou a prever sempre a Classe 0 (uma das minoritárias).
-- As **curvas de aprendizado ficaram completamente planas**, indicando que o modelo não estava aprendendo absolutamente nada, mesmo com muitas épocas:
+- As **curvas de aprendizado ficaram praticamente planas**, indicando que o modelo não estava aprendendo absolutamente nada, mesmo com muitas épocas:
   
   ![Curvas de Treinamento (LFW - LR=0.00001)](assets/lfw_fail_curves1.png)
 
@@ -137,7 +137,7 @@ To address the imbalance, I applied class weights (`class_weight='balanced'`). I
 
 - Accuracy dropped to ~5.9%.
 - The model began to predict only Class 0 (one of the minority classes).
-- The **learning curves were completely flat**, indicating that the model was not learning anything, even with many epochs:
+- The **learning curves were almost flat**, indicating that the model was not learning anything, even with many epochs:
   
   ![Training Curves (LFW - LR=0.00001)](assets/lfw_fail_curves1.png)
 
