@@ -1,6 +1,6 @@
 ## Português
 
-# Classificador de Faces com Keras (API Sequencial) - Dataset Olivetti
+# Classificador de Faces com Keras (Sequential API) - Dataset Olivetti
 
 Este projeto implementa um classificador de faces utilizando a API Sequencial do Keras, com base nos ensinamentos do Capítulo 10 e seguintes do livro "Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow" (2ª Edição). O objetivo inicial era construir um modelo do zero, mas a jornada revelou a importância crucial da escolha e adequação do dataset. O modelo final utiliza o dataset Olivetti Faces e alcança alta acurácia.
 
