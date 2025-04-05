@@ -1,78 +1,73 @@
 ## Português
 
-# Classificador de Faces com Keras (Sequential API) - Dataset Olivetti
+# Classificador de Faces com Keras: Uma Jornada com LFW e Olivetti
 
-Este projeto implementa um classificador de faces utilizando a API Sequencial do Keras, com base nos ensinamentos do Capítulo 10 e seguintes do livro "Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow" (2ª Edição). O objetivo inicial era construir um modelo do zero, mas a jornada revelou a importância crucial da escolha e adequação do dataset. O modelo final utiliza o dataset Olivetti Faces e alcança alta acurácia.
+Este projeto documenta a implementação de um classificador de faces utilizando a API Sequencial do Keras, inspirado no Capítulo 10 do livro "Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow" (2ª Edição). A jornada foi marcada por desafios iniciais com o dataset Labeled Faces in the Wild (LFW), um teste de diagnóstico bem-sucedido com o dataset Olivetti, e a descoberta de um erro crucial de pré-processamento que permitiu o sucesso final com o LFW.
 
 [![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/charlierf/hands-on-ml-face-recognition/blob/main/face_classifier_olivetti.ipynb)
 
-## A Jornada: Desafios e Aprendizados
+## Fase 1: O Desafio Inicial com LFW
 
-Minha intenção era aplicar diretamente os conceitos do livro para construir uma Rede Neural Convolucional (CNN) capaz de classificar faces.
+O objetivo era treinar uma Rede Neural Convolucional (CNN) do zero no dataset LFW, utilizando o subconjunto `lfw_people(min_faces_per_person=70)`.
 
-### Tentativa 1: Dataset Labeled Faces in the Wild (LFW)
+### O Erro de Pré-processamento
 
-Comecei utilizando um subconjunto do LFW, filtrando por pessoas com pelo menos 70 imagens (`Workspace_lfw_people(min_faces_per_person=70)`). Rapidamente enfrentei problemas:
+Parti da **suposição incorreta** de que os pixels das imagens LFW estavam no intervalo 0-255. Com base nisso, apliquei uma normalização manual, dividindo todos os valores por 255.0 (`X / 255.0`).
 
-1. **Baixa Acurácia:** Os resultados iniciais foram ruins (acurácia em torno de 41%).
-2. **Previsão Enviesada:** O modelo tendia a prever sempre a mesma classe (Classe 3 - George W Bush).
-3. **Desbalanceamento de Classes:** Uma análise revelou um forte desbalanceamento, com a classe 3 tendo muito mais amostras que as outras:
-   - Classe 0 (Ariel Sharon): 58 amostras (Treino) / 19 (Teste)
-   - Classe 1 (Colin Powell): 177 / 59
-   - Classe 2 (Donald Rumsfeld): 91 / 30
-   - **Classe 3 (George W Bush): 397 / 133**
-   - Classe 4 (Gerhard Schroeder): 82 / 27
-   - Classe 5 (Hugo Chavez): 53 / 18
-   - Classe 6 (Tony Blair): 108 / 36
+### Falha no Treinamento
 
-### Tentativa 2: Corrigindo o Desbalanceamento e Ajustando (LFW)
+As primeiras tentativas de treinamento falharam completamente:
+* A acurácia era extremamente baixa (~5-10%).
+* O modelo não aprendia, com as **curvas de perda e acurácia permanecendo planas** ao longo das épocas.
+* Tentativas de usar `class_weight` (para o desbalanceamento do LFW) ou ajustar a taxa de aprendizado não surtiram efeito, pois o problema fundamental não era esse.
 
-Para combater o desbalanceamento, apliquei pesos às classes (`class_weight='balanced'`). Aumentei também o número de épocas para 1000, esperando que o modelo tivesse mais tempo para aprender. Os resultados foram surpreendentemente piores:
+## Fase 2: Diagnóstico - Testando a Hipótese com Olivetti
 
-- A acurácia caiu para ~5.9%.
-- O modelo passou a prever sempre a Classe 0 (uma das minoritárias).
-- As **curvas de aprendizado ficaram praticamente planas**, indicando que o modelo não estava aprendendo absolutamente nada, mesmo com muitas épocas:
-  
-  ![Curvas de Treinamento (LFW - LR=0.00001)](assets/lfw_fail_curves1.png)
+Diante da falha com o LFW, surgiu a dúvida: o problema era a complexidade do LFW (variações de pose, iluminação, desbalanceamento) ou a arquitetura da minha CNN estava fundamentalmente inadequada?
 
-  Tentei ajustar a taxa de aprendizado exaustivamente, desde valores muito baixos (`1e-5`) até os padrões, mas as curvas permaneciam planas:
+Para isolar o problema, decidi realizar um **teste controlado** usando um dataset mais simples e padronizado: o **ORL Database of Faces (Olivetti)**, obtido via `olivetti_faces`. Este dataset é balanceado, possui menos variações e, importante, eu sabia que já vinha com pixels normalizados [0, 1].
 
-  ![Curvas de Treinamento (LFW - LR=0.00001)](assets/lfw_fail_curves2.png)
+### Sucesso com Olivetti
 
-### Tentativa 3: Mudança de Estratégia - Dataset Olivetti
-
-Concluí que a natureza "selvagem" (não padronizada) do LFW, com suas grandes variações de pose, iluminação e o desbalanceamento, tornava a tarefa excessivamente difícil para uma CNN treinada do zero com dados limitados, no contexto deste exercício focado nos fundamentos do livro.
-
-Decidi mudar para um dataset mais controlado: **ORL Database of Faces (Olivetti)**, disponível via `sklearn.datasets.fetch_olivetti_faces`. Este dataset possui características muito mais favoráveis:
-
-- 40 classes (pessoas).
-- 10 imagens por classe (perfeitamente balanceado).
-- Imagens em escala de cinza (64x64 pixels).
-- Poses majoritariamente frontais e iluminação mais controlada.
-- Valores de pixel já normalizados entre 0 e 1.
-
-Com o dataset Olivetti, **removi a necessidade de `class_weight`** e comecei a ajustar novamente a taxa de aprendizado. Experimentando entre `1e-5` e `0.001`, descobri que `0.001` (o padrão do Adam) funcionou muito bem para este dataset.
-
-## Resultados Finais (Dataset Olivetti)
-
-Com o dataset Olivetti e a taxa de aprendizado de 0.001, o modelo treinou com sucesso:
-
-- **Acurácia no Teste: 95.00%**
-- **Perda no Teste: 0.1014**
-
-As curvas de treinamento demonstram um aprendizado eficiente e boa generalização:
+O treinamento no Olivetti foi bem-sucedido rapidamente:
+* **Acurácia no Teste: 95.00%** (com `learning_rate=0.001`)
+* As curvas de aprendizado mostraram clara convergência e boa generalização:
 
 ![Curvas de Treinamento (Olivetti - LR=0.001)](assets/olivetti_success_curves.png)
-- A perda diminui consistentemente e a acurácia aumenta rapidamente.
-- As curvas de treino e validação estão próximas, indicando baixo overfitting.
+**Conclusão da Fase 2:** O sucesso no Olivetti foi um forte indicativo de que a arquitetura da CNN era capaz de aprender. Isso direcionou a investigação de volta para como o dataset LFW estava sendo tratado.
+
+## Fase 3: A Descoberta e o Sucesso Final com LFW
+
+Revisitei os dados retornados por `lfw_people` e fiz a **descoberta crucial**: a função do Scikit-learn **já normaliza os pixels do LFW para o intervalo [0, 1]!**
+
+Meu passo de dividir por 255 era redundante e prejudicial, "espremendo" os dados e impedindo o aprendizado.
+
+### Correção e Novo Treinamento
+
+Removi a linha `X / 255.0` do pré-processamento e treinei novamente o modelo **no LFW**, aplicando as lições:
+* Usei os dados LFW **corretamente pré-processados** (normalização [0, 1] original).
+* Mantive o `class_weight='balanced'` (pois o LFW *é* desbalanceado).
+* Utilizei a taxa de aprendizado padrão do Adam (0.001), que agora funcionou bem.
+
+## Resultados Finais (Dataset LFW Corrigido)
+
+Com o pré-processamento correto, o modelo finalmente aprendeu com sucesso no dataset LFW:
+
+* **Acurácia no Teste (LFW): 88.76%**
+* **Perda no Teste (LFW): 0.3214**
+
+As curvas de treinamento mostram o aprendizado efetivo, embora com algum overfitting começando a surgir no final (esperado para LFW):
+
+![Curvas de Treinamento (LFW Corrigido - LR=0.001)](assets/lfw_success_curves.png)
 
 ## O Código
 
-O notebook Jupyter (`face_classifier_olivetti.ipynb`) contém toda a implementação, desde o carregamento dos dados Olivetti, pré-processamento, construção do modelo CNN com a API Sequencial do Keras, treinamento e avaliação.
+O notebook Jupyter (`face_classifier_olivetti.ipynb`) contém toda a implementação, desde o carregamento dos dados do LFW e do Olivetti, pré-processamento, construção do modelo CNN com a API Sequential do Keras, treinamento e avaliação.
 
-## Dataset Utilizado
+## Datasets Utilizados
 
-O modelo final e bem-sucedido utiliza o **Olivetti Faces dataset**, carregado via `sklearn.datasets.fetch_olivetti_faces`.
+* **LFW (Principal):** Subset do Labeled Faces in the Wild via `sklearn.datasets.fetch_lfw_people(min_faces_per_person=70)`. Contém 7 classes (nesta configuração), é desbalanceado e **já vem com pixels normalizados [0, 1]**.
+* **Olivetti (Diagnóstico):** ORL Database of Faces via `sklearn.datasets.fetch_olivetti_faces`. Contém 40 classes, 10 imagens/classe (balanceado), 64x64 grayscale, **já vem com pixels normalizados [0, 1]**.
 
 ## Dependências
 
@@ -92,10 +87,11 @@ As principais bibliotecas utilizadas são:
 
 ## Aprendizados Chave
 
-- **A adequação do dataset é crucial:** Um dataset mais limpo, balanceado e padronizado pode facilitar enormemente o treinamento de modelos do zero. A dificuldade inicial estava mais no desafio imposto pelo LFW do que em erros fundamentais na abordagem inicial da CNN.
-- **Análise de Curvas é Fundamental:** Curvas de aprendizado planas são um sinal claro de problemas (taxa de aprendizado, arquitetura inadequada, etc.) que precisam ser investigados.
-- **Debugging Sistemático:** Testar hipóteses (desbalanceamento, taxa de aprendizado) de forma isolada ajuda a entender o problema.
-- **Persistência e Iteração:** O processo de Machine Learning envolve experimentar, analisar resultados (bons ou ruins) e ajustar a abordagem.
+* **A LIÇÃO MAIS IMPORTANTE: ENTENDA SEUS DADOS!** Verificar o range, o formato e o pré-processamento já aplicado é absolutamente crítico. Uma suposição errada aqui pode invalidar todo o esforço.
+* **Pré-processamento Correto é Vital:** A normalização adequada foi a diferença entre falha total e sucesso.
+* **Testes Controlados para Diagnóstico:** Usar um dataset mais simples (Olivetti) foi essencial para isolar o problema e confirmar a viabilidade da arquitetura do modelo.
+* **Análise de Curvas:** Fundamental para entender se o modelo está aprendendo, estagnado ou sofrendo overfitting.
+* **Tratamento de Desbalanceamento:** Necessário para datasets como o LFW (`class_weight`).
 
 ---
 
@@ -106,79 +102,73 @@ Espero que este repositório e o relato da minha experiência sejam úteis!
 
 ## English
 
-# Face Classifier with Keras (Sequential API) - Olivetti Dataset
+# Face Classifier with Keras: A Journey with LFW and Olivetti
 
-This project implements a face classifier using Keras' Sequential API, based on the teachings from Chapter 10 and following of the book "Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow" (2nd Edition). The initial goal was to build a model from scratch, but the journey revealed the crucial importance of selecting and adapting the dataset. The final model uses the Olivetti Faces dataset and achieves high accuracy.
+This project documents the implementation of a face classifier using the Keras Sequential API, inspired by Chapter 10 of the book "Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow" (2nd Edition). The journey involved initial challenges with the Labeled Faces in the Wild (LFW) dataset, a successful diagnostic test using the Olivetti dataset, and the discovery of a critical preprocessing error that led to final success with LFW.
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/charlierf/hands-on-ml-face-recognition/blob/main/face_classifier_olivetti.ipynb)
 
-## The Journey: Challenges and Learnings
+## Phase 1: The Initial Challenge with LFW
 
-My intention was to directly apply the book’s concepts to build a Convolutional Neural Network (CNN) capable of classifying faces.
+The goal was to train a Convolutional Neural Network (CNN) from scratch on the LFW dataset, using the `lfw_people(min_faces_per_person=70)` subset.
 
-### Attempt 1: Labeled Faces in the Wild (LFW) Dataset
+### The Preprocessing Error
 
-I started by using a subset of LFW, filtering for people with at least 70 images (`Workspace_lfw_people(min_faces_per_person=70)`). I quickly encountered issues:
+I started under the **incorrect assumption** that the LFW pixel values were in the 0-255 range. Based on this, I applied a manual normalization step, dividing all values by 255.0 (`X / 255.0`).
 
-1. **Low Accuracy:** The initial results were poor (accuracy around 41%).
-2. **Biased Predictions:** The model tended to predict the same class (Class 3 - George W Bush).
-3. **Class Imbalance:** Analysis revealed a strong imbalance, with Class 3 having many more samples than the others:
-   - Class 0 (Ariel Sharon): 58 samples (Train) / 19 (Test)
-   - Class 1 (Colin Powell): 177 / 59
-   - Class 2 (Donald Rumsfeld): 91 / 30
-   - **Class 3 (George W Bush): 397 / 133**
-   - Class 4 (Gerhard Schroeder): 82 / 27
-   - Class 5 (Hugo Chavez): 53 / 18
-   - Class 6 (Tony Blair): 108 / 36
+### Training Failure
 
-### Attempt 2: Correcting Imbalance and Adjustments (LFW)
+The initial training attempts failed completely:
+* Accuracy was extremely low (~5-10%).
+* The model failed to learn; the **loss and accuracy curves remained flat** throughout training.
+* Attempts to use `class_weight` (for LFW's known imbalance) or extensive learning rate tuning had no effect, as the fundamental problem lay elsewhere.
 
-To address the imbalance, I applied class weights (`class_weight='balanced'`). I also increased the number of epochs to 1000, hoping the model would have more time to learn. The results turned out to be surprisingly worse:
+## Phase 2: Diagnosis - Testing Hypotheses with Olivetti
 
-- Accuracy dropped to ~5.9%.
-- The model began to predict only Class 0 (one of the minority classes).
-- The **learning curves were almost flat**, indicating that the model was not learning anything, even with many epochs:
-  
-  ![Training Curves (LFW - LR=0.00001)](assets/lfw_fail_curves1.png)
+Faced with the LFW failure, the question arose: Was the issue the inherent complexity of LFW (pose/lighting variations, imbalance) or was my CNN architecture fundamentally flawed?
 
-  I tried adjusting the learning rate extensively, from very low values (`1e-5`) to the default, but the curves remained flat:
+To isolate the problem, I decided to run a **controlled experiment** using a simpler, standardized dataset: the **ORL Database of Faces (Olivetti)**, obtained via `olivetti_faces`. This dataset is balanced, has less variance, and importantly, I knew it came with correctly normalized [0, 1] pixel values.
 
-  ![Training Curves (LFW - LR=0.00001)](assets/lfw_fail_curves2.png)
+### Success with Olivetti
 
-### Attempt 3: Changing Strategy – Olivetti Dataset
-
-I concluded that the “wild” (non-standardized) nature of LFW, with its large variations in pose, lighting, and imbalance, made the task excessively difficult for a CNN trained from scratch with limited data, especially in the context of this exercise focused on the fundamentals of the book.
-
-I decided to switch to a more controlled dataset: the **ORL Database of Faces (Olivetti)**, available via `sklearn.datasets.fetch_olivetti_faces`. This dataset has much more favorable characteristics:
-
-- 40 classes (people).
-- 10 images per class (perfectly balanced).
-- Grayscale images (64x64 pixels).
-- Mostly frontal poses with more controlled lighting.
-- Pixel values already normalized between 0 and 1.
-
-With the Olivetti dataset, I **removed the need for `class_weight`** and began adjusting the learning rate again. Experimenting between `1e-5` and `0.001`, I found that `0.001` (the default for Adam) worked very well for this dataset.
-
-## Final Results (Olivetti Dataset)
-
-Using the Olivetti dataset and a learning rate of 0.001, the model trained successfully:
-
-- **Test Accuracy: 95.00%**
-- **Test Loss: 0.1014**
-
-The training curves demonstrate efficient learning and good generalization:
+Training on the Olivetti dataset was quickly successful:
+* **Test Accuracy: 95.00%** (with `learning_rate=0.001`)
+* The learning curves showed clear convergence and good generalization:
 
 ![Training Curves (Olivetti - LR=0.001)](assets/olivetti_success_curves.png)
-- The loss decreases consistently and accuracy increases rapidly.
-- The training and validation curves are close, indicating low overfitting.
+**Conclusion from Phase 2:** The success on Olivetti strongly suggested that the CNN architecture was capable of learning. This refocused the investigation back to how the LFW dataset was being handled.
 
+## Phase 3: The Breakthrough and Final Success with LFW
+
+I revisited the documentation and the data returned by `lfw_people` and made the **crucial discovery**: the Scikit-learn function **already normalizes LFW pixels to the [0, 1] range!**
+
+My step of dividing by 255 was redundant and detrimental, squashing the data and preventing the network from learning.
+
+### Correction and Retraining
+
+I removed the `X / 255.0` line from the preprocessing and retrained the model **on LFW**, applying the lessons learned:
+* Used the **correctly preprocessed** LFW data (original [0, 1] normalization).
+* Kept `class_weight='balanced'` (as LFW *is* imbalanced).
+* Used the default Adam optimizer learning rate (0.001), which now worked well.
+
+## Final Results (Corrected LFW Dataset)
+
+With the correct preprocessing, the model finally learned successfully on the LFW dataset:
+
+* **LFW Test Accuracy: 88.76%**
+* **LFW Test Loss: 0.3214**
+
+The training curves show effective learning, although with some expected overfitting starting towards the end:
+
+![Training Curves (LFW Corrected - LR=0.001)](assets/lfw_success_curves.png)
 ## The Code
 
-The Jupyter Notebook (`face_classifier_olivetti.ipynb`) contains the complete implementation, from loading the Olivetti data, preprocessing, building the CNN with Keras' Sequential API, to training and evaluation.
+The Jupyter Notebook (`face_classifier_olivetti.ipynb`) contains the complete implementation, from loading the LFW and Olivetti data, preprocessing, building the CNN with Keras' Sequential API, to training and evaluation.
 
-## Dataset Used
+## Datasets Used
 
-The final, successful model uses the **Olivetti Faces dataset**, loaded via `sklearn.datasets.fetch_olivetti_faces`.
+* **LFW (Main):** Subset of Labeled Faces in the Wild via `sklearn.datasets.fetch_lfw_people(min_faces_per_person=70)`. Contains 7 classes (in this configuration), is imbalanced, and **already has pixels normalized to [0, 1] by sklearn**.
+* **Olivetti (Diagnostic):** ORL Database of Faces via `sklearn.datasets.fetch_olivetti_faces`. Contains 40 classes, 10 images/class (balanced), 64x64 grayscale, **already has pixels normalized to [0, 1]**.
 
 ## Dependencies
 
@@ -198,14 +188,11 @@ The main libraries used are:
 
 ## Key Learnings
 
-- **The Importance of Dataset Suitability:**  
-  A cleaner, balanced, and standardized dataset can greatly facilitate training a model from scratch. The initial difficulties were more due to the challenges posed by LFW than any fundamental issues with the CNN approach.
-- **Analyzing Learning Curves is Crucial:**  
-  Flat learning curves clearly signal issues (learning rate, inadequate architecture, etc.) that need investigation.
-- **Systematic Debugging:**  
-  Testing hypotheses (class imbalance, learning rate) in isolation helps understand the problem.
-- **Persistence and Iteration:**  
-  The Machine Learning process involves experimenting, analyzing both good and bad results, and adjusting the approach accordingly.
+* **THE MOST IMPORTANT LESSON: UNDERSTAND YOUR DATA!** Checking the range, format, and any pre-applied preprocessing is absolutely critical. A wrong assumption here can invalidate everything.
+* **Correct Preprocessing is Vital:** Proper normalization was the difference between complete failure and success.
+* **Controlled Tests for Diagnosis:** Using a simpler dataset (Olivetti) was essential for isolating the problem and validating the model architecture.
+* **Curve Analysis:** Fundamental for understanding if the model is learning, stagnating, or overfitting.
+* **Handling Imbalance:** Necessary for datasets like LFW (`class_weight`).
 
 ---
 
