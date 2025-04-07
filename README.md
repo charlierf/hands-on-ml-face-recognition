@@ -4,7 +4,7 @@
 
 Este projeto documenta a implementação de um classificador de faces utilizando a API Sequencial do Keras, inspirado no Capítulo 10 do livro "Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow" (2ª Edição). A jornada foi marcada por desafios iniciais com o dataset Labeled Faces in the Wild (LFW), um teste de diagnóstico bem-sucedido com o dataset Olivetti, e a descoberta de um erro crucial de pré-processamento que permitiu o sucesso final com o LFW.
 
-[![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/charlierf/hands-on-ml-face-recognition/blob/main/face_classifier_olivetti.ipynb)
+[![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/charlierf/hands-on-ml-face-recognition/blob/main/face_classifier_keras.ipynb)
 
 ## Fase 1: O Desafio Inicial com LFW
 
@@ -62,7 +62,7 @@ As curvas de treinamento mostram o aprendizado efetivo, embora com algum overfit
 
 ## O Código
 
-O notebook Jupyter (`face_classifier_olivetti.ipynb`) contém toda a implementação, desde o carregamento dos dados do LFW e do Olivetti, pré-processamento, construção do modelo CNN com a API Sequential do Keras, treinamento e avaliação.
+O notebook Jupyter (`face_classifier_keras.ipynb`) contém toda a implementação, desde o carregamento dos dados do LFW e do Olivetti, pré-processamento, construção do modelo CNN com a API Sequential do Keras, treinamento e avaliação.
 
 ## Datasets Utilizados
 
@@ -83,7 +83,7 @@ As principais bibliotecas utilizadas são:
 1. Clone este repositório: `git clone https://github.com/charlierf/hands-on-ml-face-recognition.git`
 2. Navegue até a pasta: `cd hands-on-ml-face-recognition`
 3. Instale as dependências usando o comando `pip install -r requirements.txt`.
-4. Abra o notebook `face_classifier_olivetti.ipynb` em um ambiente Jupyter (como Jupyter Lab, Jupyter Notebook ou Google Colab) e execute as células.
+4. Abra o notebook `face_classifier_keras.ipynb` em um ambiente Jupyter (como Jupyter Lab, Jupyter Notebook ou Google Colab) e execute as células.
 
 ## Aprendizados Chave
 
@@ -106,7 +106,7 @@ Espero que este repositório e o relato da minha experiência sejam úteis!
 
 This project documents the implementation of a face classifier using the Keras Sequential API, inspired by Chapter 10 of the book "Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow" (2nd Edition). The journey involved initial challenges with the Labeled Faces in the Wild (LFW) dataset, a successful diagnostic test using the Olivetti dataset, and the discovery of a critical preprocessing error that led to final success with LFW.
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/charlierf/hands-on-ml-face-recognition/blob/main/face_classifier_olivetti.ipynb)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/charlierf/hands-on-ml-face-recognition/blob/main/face_classifier_keras.ipynb)
 
 ## Phase 1: The Initial Challenge with LFW
 
@@ -163,7 +163,7 @@ The training curves show effective learning, although with some expected overfit
 ![Training Curves (LFW Corrected - LR=0.001)](assets/lfw_success_curves.png)
 ## The Code
 
-The Jupyter Notebook (`face_classifier_olivetti.ipynb`) contains the complete implementation, from loading the LFW and Olivetti data, preprocessing, building the CNN with Keras' Sequential API, to training and evaluation.
+The Jupyter Notebook (`face_classifier_keras.ipynb`) contains the complete implementation, from loading the LFW and Olivetti data, preprocessing, building the CNN with Keras' Sequential API, to training and evaluation.
 
 ## Datasets Used
 
@@ -184,7 +184,7 @@ The main libraries used are:
 1. Clone this repository: `git clone https://github.com/charlierf/hands-on-ml-face-recognition.git`
 2. Navigate to the project folder: `cd hands-on-ml-face-recognition`
 3. Install the dependencies using: `pip install -r requirements.txt`
-4. Open the notebook `face_classifier_olivetti.ipynb` in a Jupyter environment (e.g., Jupyter Lab, Jupyter Notebook, or Google Colab) and run the cells.
+4. Open the notebook `face_classifier_keras.ipynb` in a Jupyter environment (e.g., Jupyter Lab, Jupyter Notebook, or Google Colab) and run the cells.
 
 ## Key Learnings
 
